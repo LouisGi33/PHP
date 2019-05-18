@@ -128,19 +128,16 @@
         // ** DELETE SPAWN **
             if (isset($_POST['rm'])) {
                 echo '<input type="text" name="id" placeholder="ID du Spawn">';
+                echo '<input type="submit" value="OK">';
             }
             if (isset($_POST['id'])) {
                 $del_sp = $_POST['id'];
                 $table = array('list', 'img');
                 for ($i = 0; $i < 2; $i++) {
                     $rm = $dsn->prepare("DELETE FROM ".$table[$i]."_spawn WHERE id = ".$del_sp." ;");
-                    $rmv = $dsn->exec($rm);
+                    $rmv = $rm->execute();
                 }
-            }
-
-            
-        ?>
-
+            } ?>
     
         <br /> <br /> 
         <?php
@@ -176,3 +173,8 @@
 
     </body>
 </html>
+
+
+
+
+
