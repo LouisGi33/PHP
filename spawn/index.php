@@ -36,9 +36,13 @@
     </head>
     <body>
         <h1>Fonctionnalités : </h1>
+         
+        
+        <?php 
+             ?>
 
         <form action="" method="POST">
-        <input type="submit" value="Liste des Spawns" name="list" />
+        <input type="submit" value="Liste des Spawns" name="list">
 
 
         <?php 
@@ -68,7 +72,7 @@
 
 
         <form action="" method="POST">
-            <input type="submit" value="Creation d'un Spawn" name="crea" />
+            <input type="submit" value="Creation d'un Spawn" name="crea">
             <br />
         <?php 
 
@@ -78,11 +82,13 @@
                 echo '<input type="text" name="url" placeholder="URL de l\'image" /><br />';
                 echo '<input type="submit" value="OK">';
             }
-            $crea = $dsn->prepare('INSERT INTO list_spawn(list_spawn.name) VALUES(?, ?)');
+            $crea = $dsn->prepare('INSERT INTO list_spawn(list_spawn.name) VALUES(?)');
             if ((isset($_POST["url"])) && (isset($_POST["nom"]))) {
                 $url = $_POST['url']; 
-                $path = `C:\wamp64\www\spawn\images`;
+                $img_name = $_POST["nom"];
+                $path = `./images`;
                 $cut = explode('/',$url);
+                $serv = $cut[0].'//'.$cut[2]; 
                 $fichier = array_pop($cut);
                 
                 // Le chemin de sauvegarde 
@@ -90,25 +96,28 @@
                 // On coupe le chemin 
                 
                 // On recup l'adresse du serveur 
-                // $serv = $exp[0].'//'.$exp[2]; 
+                
                 // On recup le nom du fichier 
                 
-                echo $fichier; 
+                echo $cut[2]; 
                 // On genere le contexte (pour contourner les protections anti-leech) 
-                // $xcontext = stream_context_create(array("http"=>array("header"=>"Referer: ".$serv."\r\n"))); 
+                $xcontext = stream_context_create(array("http"=>array("header"=>"Referer: ".$serv."\r\n"))); 
                 // On tente de recuperer l'image 
-                // $content = file_get_contents($url,false,$xcontext); 
-                // if ($content === false) { 
-                    // echo "\nImpossible de récuperer le fichier."; 
-                // } 
+                $content = file_get_contents($url,false,$xcontext); 
+                if ($content === false) { 
+                    echo "\nImpossible de récuperer le fichier."; 
+                } 
                 // Sinon, si c'est bon, on sauvegarde le fichier 
-                // $test = file_put_contents($path.'/'.$name,$content); 
-                // if ($test === false) { 
-                    // echo "\nImpossible de sauvegarder le fichier.";  
-                // } 
+                $test = file_put_contents($path.'/'.$fichier,$content); 
+                if ($test === false) { 
+                    echo "\nImpossible de sauvegarder le fichier.";  
+                }
+                else if ($test === true) {
+                    echo "\n GG";
+                }
                 // Tout est OK 
                 
-                $crea->execute(array($fichier, $_POST['url']));
+                $crea->execute(array($fichier));
                 echo "\nSauvegarde effectuée avec succés."; 
             }
             else {
@@ -118,7 +127,7 @@
 
         <br /> <br /> 
         <form action="" method="POST">
-            <input type="submit" value="Modifier un Spawn" name="change" />
+            <input type="submit" value="Modifier un Spawn" name="change">
         <?php 
 
         // ** CHANGE SPAWN **
@@ -127,44 +136,52 @@
         
         <br /> <br /> 
         <form action="" method="POST">
-            <input type="submit" value="Supprimer un Spawn" name="rm" />
+            <input type="submit" value="Supprimer un Spawn" name="rm">
 
         <?php 
 
         // ** DELETE SPAWN **
             if (isset($_POST['rm'])) {
-                echo '<input type="text" name="id" placeholder="ID du Spawn" />';
+                echo '<input type="text" name="id" placeholder="ID du Spawn">';
             }
-            // $del_sp = 
-            // $rm = "DELETE FROM list_spawn WHERE list_spawn.name = ".$del_sp." ;";
-            // $rmv = $dsn->exec($rm(array($)));
+            if (isset($_POST['id'])) {
+                $del_sp = $_POST['id'];
+                $table = array('list', 'img');
+                for ($i = 0; $i < 2; $i++) {
+                    $rm = $dsn->prepare("DELETE FROM ".$table[$i]."_spawn WHERE id = ".$del_sp." ;");
+                    $rmv = $dsn->exec($rm);
+                }
+            }
+
+            
         ?>
 
     
         <br /> <br /> 
-        <form action="" method="POST">
-            <input type="submit" value="Spawn aléatoire ! " name="random" />
-            <input type="hidden" name="check" />
+        <?php
 
-        <br /> 
-        <?php 
         // ** RANDOM SPAWN **
-            $check = $_POST['random'];
             if ((isset($_POST['check'])) && (!empty($_POST['check']))) {
-                
+                $check = $_POST['check'];
                 do{
-                    echo 'ok';
                     $path = 'SELECT i.name, l.name from img_spawn i JOIN list_spawn l ON l.id = i.id order by rand() limit 1';
                     $rand = $dsn->query($path);
                     $new_sp = $rand->fetch();
                 } while ($check == $new_sp[1]) ;
             }
             else {    
-                // echo "ok";
                 $path = 'SELECT i.name, l.name from img_spawn i JOIN list_spawn l ON l.id = i.id order by rand() limit 1';
                 $rand = $dsn->query($path);
                 $new_sp = $rand->fetch();
             }
+            
+        ?>
+        <form action="" method="POST">
+            <input type="submit" value="Spawn aléatoire ! " name="random">
+            <input type="hidden" name="check" value="<?= $new_sp[1] ;?>">
+            
+        <br /> 
+        <?php 
             if (isset($_POST["random"])) {
                 echo '<br><img src="'.$new_sp[0].'" alt="" width="500"><br>';
                 echo '<h2>'.$new_sp[1].'</h2>';
@@ -174,6 +191,8 @@
 
     </body>
 </html>
+
+
 
 
 
