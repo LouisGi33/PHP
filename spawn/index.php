@@ -13,12 +13,6 @@
         echo ' Erreux ! : '.$e->getMessage()."<br/>";
         die();
     }
-
-
-/*    try {
-        $connexion = new PDO ('mysql:host=localhost:3307:dbname=spawn','root','') ;
-    } */
-
     
 ; ?>
 
@@ -86,28 +80,20 @@
             if ((isset($_POST["url"])) && (isset($_POST["nom"]))) {
                 $url = $_POST['url']; 
                 $img_name = $_POST["nom"];
-                $path = `./images`;
+                $path = `/images`;
                 $cut = explode('/',$url);
                 $serv = $cut[0].'//'.$cut[2]; 
                 $fichier = array_pop($cut);
-                
-                // Le chemin de sauvegarde 
-                
-                // On coupe le chemin 
-                
-                // On recup l'adresse du serveur 
-                
-                // On recup le nom du fichier 
-                
+
                 echo $cut[2]; 
                 // On genere le contexte (pour contourner les protections anti-leech) 
                 $xcontext = stream_context_create(array("http"=>array("header"=>"Referer: ".$serv."\r\n"))); 
-                // On tente de recuperer l'image 
+                // Recuperation img
                 $content = file_get_contents($url,false,$xcontext); 
                 if ($content === false) { 
                     echo "\nImpossible de récuperer le fichier."; 
                 } 
-                // Sinon, si c'est bon, on sauvegarde le fichier 
+                // Sauvegarde de l'img 
                 $test = file_put_contents($path.'/'.$fichier,$content); 
                 if ($test === false) { 
                     echo "\nImpossible de sauvegarder le fichier.";  
@@ -115,7 +101,6 @@
                 else if ($test === true) {
                     echo "\n GG";
                 }
-                // Tout est OK 
                 
                 $crea->execute(array($fichier));
                 echo "\nSauvegarde effectuée avec succés."; 
@@ -191,8 +176,3 @@
 
     </body>
 </html>
-
-
-
-
-
