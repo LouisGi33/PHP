@@ -13,6 +13,10 @@
         echo ' Erreux ! : '.$e->getMessage()."<br/>";
         die();
     }
+
+
+
+    $table = array('list', 'img');
     
 ; ?>
 
@@ -76,46 +80,74 @@
                 echo '<input type="text" name="url" placeholder="URL de l\'image" /><br />';
                 echo '<input type="submit" value="OK">';
             }
-            $crea = $dsn->prepare('INSERT INTO list_spawn(list_spawn.name) VALUES(?)');
+            for ($i = 0; $i < 2; $i++) {
+                $crea = $dsn->prepare('INSERT INTO list_spawn(list_spawn.name) VALUES(?)');
+                $crea2 = $dsn->prepare('INSERT INTO img_spawn(img_spawn.name) VALUES(?)');
+            }
+            
+
             if ((isset($_POST["url"])) && (isset($_POST["nom"]))) {
                 $url = $_POST['url']; 
+                $nom = $_POST['nom'];
                 $img_name = $_POST["nom"];
-                $path = `/images`;
+                $path = '/images';
                 $cut = explode('/',$url);
                 $serv = $cut[0].'//'.$cut[2]; 
                 $fichier = array_pop($cut);
-
-                echo $cut[2]; 
-                // On genere le contexte (pour contourner les protections anti-leech) 
                 $xcontext = stream_context_create(array("http"=>array("header"=>"Referer: ".$serv."\r\n"))); 
-                // Recuperation img
                 $content = file_get_contents($url,false,$xcontext); 
                 if ($content === false) { 
-                    echo "\nImpossible de récuperer le fichier."; 
+                    echo "\nImpossible de récuperer l'image."; 
                 } 
-                // Sauvegarde de l'img 
-                $test = file_put_contents($path.'/'.$fichier,$content); 
+                $test = file_put_contents('.'.$path.'/'.$nom.'.jpg', $content); 
                 if ($test === false) { 
-                    echo "\nImpossible de sauvegarder le fichier.";  
+                    echo "\nImpossible de sauvegarder l'image.";  
                 }
-                else if ($test === true) {
+                if ($test === true) {
                     echo "\n GG";
                 }
                 
-                $crea->execute(array($fichier));
-                echo "\nSauvegarde effectuée avec succés."; 
-            }
-            else {
-                echo "\nca marche pas";
+                $crea->execute(array($nom));
+                $crea2->execute(array($path.'/'.$fichier));
+                echo "\nSauvegarde effectuée avec succes."; 
             }
         ?>
 
-        <br /> <br /> 
+        <br />
         <form action="" method="POST">
             <input type="submit" value="Modifier un Spawn" name="change">
         <?php 
 
         // ** CHANGE SPAWN **
+
+            if (isset($_POST['change'])) {
+                
+                
+                echo '<br /><input type="text" name="switch" placeholder="ID du Spawn"><br />';
+                echo '<input type="submit" value="OK">';
+            }
+            
+            if (isset ($_POST['switch'])) {
+                $exist = $_POST['switch'];
+                echo 'hey';
+                
+                echo '<br /><input type="text" name="new_name" placeholder="Nouveau nom"><br />';
+                echo '<input type="text" name="new_img" placeholder="Nouvelle image"><br />';
+                echo '<input type="submit" value="OK">';
+            }
+            if ((isset($_POST['new_name'])) && (isset($_POST['new_img']))) {
+                 
+                
+                echo 'ok';
+                $table = array('list', 'img');
+                for ($i = 0; $i < 2; $i++) {
+                    $verif = $dsn->prepare("SELECT id FROM ".$table[$i]."_spawn WHERE id = ".$exist);
+                    $verification = $verif->execute();
+                }
+                $upd = "update list_spawn set name = '".$_PATH['new_name']."' where id = '".$exist."'";
+                $upd2 = "update img_spawn set name = '".$_PATH['new_name']."' where id = '".$exist."'";
+            }
+            
 
         ?>
         
@@ -123,20 +155,31 @@
         <form action="" method="POST">
             <input type="submit" value="Supprimer un Spawn" name="rm">
 
+        
         <?php 
 
         // ** DELETE SPAWN **
             if (isset($_POST['rm'])) {
-                echo '<input type="text" name="id" placeholder="ID du Spawn">';
+                echo '<br/><input type="text" name="id" placeholder="ID du Spawn"><br />';
                 echo '<input type="submit" value="OK">';
             }
             if (isset($_POST['id'])) {
                 $del_sp = $_POST['id'];
-                $table = array('list', 'img');
+                $sum = "SELECT COUNT(l.id) FROM list_spawn l WHERE l.name LIKE '_%'";
+                $compteur = $dsn->query($sum);
+                $count = $compteur->fetch();
+
                 for ($i = 0; $i < 2; $i++) {
-                    $rm = $dsn->prepare("DELETE FROM ".$table[$i]."_spawn WHERE id = ".$del_sp." ;");
+                    $rst = $dsn->prepare("ALTER TABLE ".$table[$i]."_spawn AUTO_INCREMENT = ".$count[0].";");
+                    $reset = $rst->execute();
+
+
+                    $rm = $dsn->prepare("DELETE FROM ".$table[$i]."_spawn WHERE id = ".$del_sp);
                     $rmv = $rm->execute();
+                    // DBCC CHECKIDENT($table[$i], RESEED, $count[0]);
                 }
+                
+                echo '<br />Suppression du Spawn effectuée.';
             } ?>
     
         <br /> <br /> 
@@ -173,8 +216,3 @@
 
     </body>
 </html>
-
-
-
-
-
