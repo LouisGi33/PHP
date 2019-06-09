@@ -5,7 +5,7 @@
         protected $level;
         protected $master;
 
-        public function __construct($name, $level) {
+        public function __construct($level) {
             $this->name = $name;
             $this->level = $level;
         }
