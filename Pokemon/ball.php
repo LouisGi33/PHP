@@ -19,16 +19,14 @@
                 $new_pokemon = clone $pokemon;
                 echo $success;
             }
-            else if ($capture => $random) {
+            else if ($capture >= $random) {
                 $new_pokemon = clone $pokemon;
                 echo $success;
             }
             else {
-                echo "Votre tentative de capture a echouée.."
+                echo "Votre tentative de capture a echouée..";
             }
         }
-
-        public function master()
     }
 ?>
 

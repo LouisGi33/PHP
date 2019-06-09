@@ -41,7 +41,7 @@
 
         public function hit($hit) {
             $this->life -= $hit;
-            $this->life = ($this->life < 0 ? 0) : $this->life;
+            $this->life = $this->life < 0 ? 0 : $this->life;
             echo "Outch ! ".$this->name." a encore ".$this->life."/".$this->max_life." PV.";
         }
 

@@ -9,7 +9,7 @@
         }
 
         public function healing(Pokemon $pokemon) {
-            if ($pokemon->life + $heal) >= $pokemon->max_life {
+            if ($pokemon->life + $heal >= $pokemon->max_life) {
                 $pokemon->life = $pokemon->max_life;
             }
             else {
